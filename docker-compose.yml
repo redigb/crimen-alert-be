@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel_app
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - laravel
+    command: >
+      sh -c "
+        chmod +x wait-for-db.sh &&
+        ./wait-for-db.sh &&
+        composer install || echo '⚠️ Composer install falló, continuaré...';
+        php artisan key:generate || echo '⚠️ Key generate falló, continuaré...';
+        php artisan migrate --seed || echo '⚠️ Artisan migrate falló, continuaré...';
+        php-fpm
+      "
+
+  webserver:
+    image: nginx:alpine
+    container_name: nginx_server
+    ports:
+      - "80:80"
+    volumes:
+      - .:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - laravel
+
+  db:
+    image: mysql:8.0
+    container_name: laravel_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: segure_crime_app
+      MYSQL_ROOT_PASSWORD: "SuperClaveProduccionSegura123!"
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: "AppUserPassword456!@"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - laravel
+
+volumes:
+  db_data:
+
+networks:
+  laravel:
