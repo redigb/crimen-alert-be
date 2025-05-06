@@ -2,10 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+
+
+use Laravel\Sanctum\HasApiTokens; 
+use Illuminate\Notifications\Notifiable;
 
 class Users extends Model
 {
+    // Token
+    use HasApiTokens, Notifiable, HasFactory;
+
     protected $table = 'users';
 
     protected $fillable = [
@@ -21,8 +29,7 @@ class Users extends Model
         'remember_token',
     ];
 
-    protected $casts = [
+    /*protected $casts = [
         'email_verified_at' => 'datetime',
-    ];
-
+    ];*/
 }

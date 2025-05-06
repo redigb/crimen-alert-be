@@ -9,12 +9,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
+
 class UsersController extends Controller 
 {
     use NombreClaseTrait;
     
     protected $logService;
     protected $nombreTable;
+
     
     public function __construct(LogService $logService) 
     {
