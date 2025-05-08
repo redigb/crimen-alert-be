@@ -1,5 +1,6 @@
 <?php
 namespace App\Traits;
+
 trait NombreClaseTrait
 {
     public function getNombreClaseModificado()

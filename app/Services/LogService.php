@@ -17,3 +17,4 @@ class LogService{
         Log::channel('daily_custom')->warning(now()->format('[Y-m-d H:i:s]') . ' ' . $mensaje);
     }
 }
+ 

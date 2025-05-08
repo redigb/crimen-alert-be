@@ -6,9 +6,11 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class ImageService {
+    
     /**
      * Validar archivo subido.
      */
+
     public function validateFile(Request $request, array $rules){
         $validator = Validator::make($request->all(), $rules);
 
