@@ -1,20 +1,28 @@
 <?php
-
 use App\Http\Controllers\{
-    UsersController,
+    UserController,
     UsersReportsController
 };
 
-use Illuminate\Http\Request;
-// use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Rutas Privadas - Token
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::get('/user/{name}', [UserController::class, 'userConsult']);
+    Route::post('/user/upload-image-profile', [UserController::class, 'uploadImageProfile']);
+
+    Route::get('/users', [UserController::class, 'users']);
+    Route::post('/usersReport', [UsersReportsController::class, 'usersReport']);
+
+    Route::post('/auth/logout', [UserController::class, 'logout']);
 });
 
+// Rutas - Auth
+Route::prefix('auth')->group(function () {
 
-Route::get('/users', [UsersController::class, 'users']);
-Route::post('/login', [UsersController::class, 'login']);
-Route::post('/user', [UsersController::class, 'store']);
-
-Route::post('/usersReport', [UsersReportsController::class, 'usersReport']);
+    Route::post('/login', [UserController::class, 'login']);
+    Route::post('/register', [UserController::class, 'register']);
+    
+});
+ 
