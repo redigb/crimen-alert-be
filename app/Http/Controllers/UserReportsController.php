@@ -7,7 +7,7 @@ use App\Utils\FileHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class UsersReportsController extends Controller
+class UserReportsController extends Controller
 {
     public function usersReport(Request $request)
     {

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 
 
 class UserController extends Controller {
+
     use NombreClaseTrait;
     
     protected $logService;
@@ -120,7 +121,7 @@ class UserController extends Controller {
         return response()->json([
             'status' => false,
             'message' => 'No autorizado.'
-        ], 401); 
+        ], 401);
     }
 
     public function register(Request $request){
@@ -131,7 +132,7 @@ class UserController extends Controller {
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
                 'telefono' => ['required', 'regex:/^\+51\d{9}$/'],
-                'password' => 'required|string|min:6|confirmed',
+                'password' => 'required|string|min:6',
             ]);
             
             if ($validator->fails()) {

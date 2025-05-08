@@ -1,7 +1,7 @@
 <?php
 use App\Http\Controllers\{
     UserController,
-    UsersReportsController
+    UserReportsController
 };
 
 use Illuminate\Support\Facades\Route;
@@ -13,7 +13,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user/upload-image-profile', [UserController::class, 'uploadImageProfile']);
 
     Route::get('/users', [UserController::class, 'users']);
-    Route::post('/usersReport', [UsersReportsController::class, 'usersReport']);
+    Route::post('/usersReport', [UserReportsController::class, 'usersReport']);
 
     Route::post('/auth/logout', [UserController::class, 'logout']);
 });

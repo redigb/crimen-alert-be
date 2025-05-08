@@ -4,8 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Log;
 
-class LogService
-{
+class LogService{
     public function registrarInfo($mensaje){
         Log::channel('daily_custom')->info(now()->format('[Y-m-d H:i:s]') . ' ' . $mensaje);
     }
