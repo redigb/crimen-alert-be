@@ -20,6 +20,8 @@ COPY . .
 # Instalar PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
+# Optimizar autoload para producción
+RUN composer dump-autoload -o
 
 # Permisos de carpetas importantes
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
