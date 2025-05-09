@@ -50,6 +50,7 @@ class UserController extends Controller {
             $response["status"] = 200;
             $response["msg"] = "Usuario encontrado!";
             $response["data"] = [
+                'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
                 'telefono' => $user->telefono,
@@ -57,44 +58,51 @@ class UserController extends Controller {
                 'image_profile' => $user->image_profile,
             ];
         } else {
-            $response["status"] = 200;
+            $response["status"] = 404;
             $response["msg"] = "No se encontró el usuario.";
         }
         return response()->json($response);
     }
 
-    public function login(Request $request){
+    public function login(Request $request) {
         $response = ["status" => false, "msg" => ""];
-        
+
         $validator = Validator::make(json_decode($request->getContent(), true) ?? $request->all(), [
             'email' => 'required|email',
             'password' => 'required'
         ]);
-        
+
         if ($validator->fails()) {
             $response["status"] = 422;
-           $response["msg"] = "Error de validación";
+            $response["msg"] = "Error de validación";
             return response()->json($response, 422);
         }
-        
+
         $data = json_decode($request->getContent());
         if (!$data && $request->has('email')) {
             $data = (object) $request->all();
         }
 
         $user = User::where('email', $data->email)->first();
+
         if ($user && Hash::check($data->password, $user->password)) {
-            $user->tokens()->delete();
-            
-            $token = $user->createToken('auth_token'); // Crear nuevo token
-            
+            $tokenCount = $user->tokens()->count();
+            if ($tokenCount >= 2) {
+                $oldestToken = $user->tokens()->oldest()->first();
+                if ($oldestToken) {
+                    $oldestToken->delete();
+                }
+            }
+
+            $token = $user->createToken('auth_token', ['*'], now()->addHours(2));
+
             if (!$user->active) {
                 $user->active = true;
                 $user->save();
             }
 
             $response["status"] = 200;
-            $response["msg"] = "Succes.";
+            $response["msg"] = "Success.";
             $response["name"] = $user->name;
             $response["email"] = $user->email;
             $response["token"] = $token->plainTextToken;
@@ -102,17 +110,21 @@ class UserController extends Controller {
             $response["status"] = 401;
             $response["msg"] = "Usuario o contraseña incorrectos.";
         }
+
         return response()->json($response);
     }
     
     public function logout(Request $request){
         $user = $request->user();
         if ($user) {
-            // Desactivar usuario
+            /**
+             * * Desactivar el usuario 
+             * * ERROR DE SECCION - en espera de coreecion en manejo de estado
+             */
             $user->active = false;
             $user->save();
-            // Eliminar todos los tokens
-            $user->tokens()->delete();
+            // Eliminar solo token de uso
+            $user->currentAccessToken()->delete();
             return response()->json([
                 'status' => true,
                 'message' => 'Cierre de sesión exitoso.',
@@ -124,7 +136,7 @@ class UserController extends Controller {
         ], 401);
     }
 
-    public function register(Request $request){
+    public function register(Request $request) {
         $this->logService->registrarInfo('*** Init Registro de Usuario ***');
         
         try {
@@ -178,7 +190,7 @@ class UserController extends Controller {
         //-Caso: Eliminar-imagen
         if ($request->has('delete') && $request->delete == true) {
             if ($user->image_profile) {
-                $this->mediaService->deleteFile($user->image_profile); // eliminar-imagen-anterior
+                $this->mediaService->deleteFile($user->image_profile);
                 $user->image_profile = null;
                 $user->save();
             }
