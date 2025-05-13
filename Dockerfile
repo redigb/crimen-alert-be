@@ -1,8 +1,6 @@
-# PHP FPM oficial
-FROM php:8.3-fpm
+FROM php:8.2-fpm
 
 RUN apt-get update && apt-get install -y \
-    nginx \
     git \
     unzip \
     libzip-dev \
@@ -11,23 +9,23 @@ RUN apt-get update && apt-get install -y \
     zip \
     && docker-php-ext-install pdo_mysql zip
 
-# Install composer
+# Instalar Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 COPY . .
 
-# Instalar PHP dependencies
+# Instalar dependencias
 RUN composer install --no-dev --optimize-autoloader
-
-# Optimizar autoload para producción
 RUN composer dump-autoload -o
 
-# Permisos de carpetas importantes
+# Permisos
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Exponer puerto
-# EXPOSE 3000
+# Copiar script de inicio
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Comando final: Migraciones, Seeders, y luego Servidor
-# CMD php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=3000
+EXPOSE 3000
+
+CMD ["/entrypoint.sh"]
