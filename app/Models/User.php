@@ -21,7 +21,8 @@ class User extends Authenticatable{
         'password',
         'image_profile',
         'active',
-        'is_premium',   
+        'is_premium',
+        'role'   
     ];
 
     protected $hidden = [

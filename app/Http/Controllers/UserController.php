@@ -94,7 +94,7 @@ class UserController extends Controller {
                 }
             }
 
-            $token = $user->createToken('auth_token', ['*'], now()->addHours(2));
+            $token = $user->createToken('auth_token', ['*'], now()->addHours(7));
 
             if (!$user->active) {
                 $user->active = true;

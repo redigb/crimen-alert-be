@@ -1,5 +1,5 @@
 # PHP FPM oficial
-FROM php:8.2-fpm
+FROM php:8.3-fpm
 
 RUN apt-get update && apt-get install -y \
     nginx \
@@ -27,7 +27,7 @@ RUN composer dump-autoload -o
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 # Exponer puerto
-EXPOSE 3000
+# EXPOSE 3000
 
 # Comando final: Migraciones, Seeders, y luego Servidor
-CMD php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=3000
+# CMD php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=3000

@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\{
+    ReportVoteController,
     UserController,
     UserReportsController
 };
@@ -14,10 +15,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users', [UserController::class, 'users']);
     Route::post('/auth/logout', [UserController::class, 'logout']);
 
-
     // Reports - user - alert
-    Route::post('/reports', [UserReportsController::class, 'userReportCreate']);
+    Route::get('/reports', [UserReportsController::class, 'reportsList']);
     Route::post('/reports/create', [UserReportsController::class, 'userReportCreate']);
+
+    // Votos en reportes
+    Route::get('/report-votes/{report_id}', [ReportVoteController::class, 'listVotos']); // Listar votos de un reporte
+    Route::post('/report-votes', [ReportVoteController::class, 'store']); // Registrar voto
+
+    
 });
 
 /*Route::middleware('auth:sanctum')->prefix('reports')->group(function () {

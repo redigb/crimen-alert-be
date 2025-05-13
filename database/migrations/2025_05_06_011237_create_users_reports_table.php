@@ -15,15 +15,16 @@ return new class extends Migration
             $table->id();
             $table->string('titulo');
             $table->text('descripcion');
-            $table->decimal('latitude');
-            $table->decimal('longitude');
+            $table->string('estado')->default('nuevo');
+            $table->string('direccion');
+            $table->decimal('latitude', 11, 8);
+            $table->decimal('longitude', 11, 8);
             $table->string('image')->nullable();
             $table->string('video')->nullable();
             $table->datetime('fecha_hora_report');
             $table->timestamps();
 
             $table->foreignId('user_id')->constrained('users');
-
         });
     }
 

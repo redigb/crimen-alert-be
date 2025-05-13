@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ReportComment;
+use App\Models\ReportVote;
 use App\Models\UserReports;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
 
-class UserReportsController extends Controller {
+class UserReportsController extends Controller
+{
 
     protected $imageService;
 
@@ -16,13 +19,44 @@ class UserReportsController extends Controller {
 
     public function reportsList() {
         $reports = UserReports::with('user')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        ->withCount(['votes as votes_conforme' => function ($query) {
+                $query->where('vote', 'conforme');
+            }, 'votes as votes_no_conforme' => function ($query) {
+                $query->where('vote', 'no_conforme');
+             },
+            'comments as comments_count'])->orderBy('created_at', 'desc')->paginate(10);
+
+        $filteredReports = collect($reports->items())->map(function ($report) {
+            return [
+                'id' => $report->id,
+                'titulo' => $report->titulo,
+                'estado' => $report->estado ?? null,
+                'fecha_hora_report' => $report->fecha_hora_report,
+                'direccion' => $report->direccion,
+                'descripcion' => $report->descripcion,
+                'latitude' => $report->latitude,
+                'longitude' => $report->longitude,
+                'user' => [
+                    'id' => $report->user->id ?? null,
+                    'name' => $report->user->name ?? null,
+                    'image_profile' => $report->user && $report->user->image_profile
+                        ? asset('storage/' . $report->user->image_profile)
+                        : null,
+                ],
+
+                'image' => $report->image ? asset($report->image) : null,
+                'video' => $report->video ? asset($report->video) : null,
+
+                'votes_conforme' => $report->votes_conforme,
+                'votes_no_conforme' => $report->votes_no_conforme,
+                'comments_count' => $report->comments_count,
+            ];
+        });
 
         return response()->json([
             'status' => 200,
             'message' => 'Lista de reportes',
-            'data' => $reports->items(),
+            'data' =>  $filteredReports,
             'pagination' => [
                 'current_page' => $reports->currentPage(),
                 'next_page_url' => $reports->nextPageUrl(),
@@ -31,11 +65,12 @@ class UserReportsController extends Controller {
         ], 200);
     }
 
-
     public function userReportCreate(Request $request) {
+
         $validation = $this->imageService->validateFile($request, [
             'titulo' => 'required|string|max:255',
             'descripcion' => 'required|string',
+            'direccion' => 'required|string',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'user_id' => 'required|exists:users,id',
@@ -69,6 +104,8 @@ class UserReportsController extends Controller {
             'titulo' => $request->input('titulo'),
             'descripcion' => $request->input('descripcion'),
             'latitude' => $request->input('latitude'),
+            'estado' => $request->input('estado', collect(['nuevo', 'verificado', 'urgente'])->random()),
+            'direccion' => $request->input('direccion'),
             'longitude' => $request->input('longitude'),
             'image' => $imagePath ? 'storage/' . $imagePath : null,
             'video' => $videoPath ? 'storage/' . $videoPath : null,
@@ -86,6 +123,7 @@ class UserReportsController extends Controller {
     }
 
     public function userReportDelete(Request $request, $id) {
+
         $report = UserReports::find($id);
 
         if (!$report) {
@@ -111,7 +149,7 @@ class UserReportsController extends Controller {
             'message' => 'Reporte eliminado exitosamente',
         ], 200);
     }
-  
+
     public function userReportUpdate(Request $request, $id) {
         $report = UserReports::find($id);
 
@@ -166,4 +204,5 @@ class UserReportsController extends Controller {
             'report' => $report,
         ], 200);
     }
+
 }
